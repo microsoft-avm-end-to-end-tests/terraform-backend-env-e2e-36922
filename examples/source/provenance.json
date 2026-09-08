@@ -1,0 +1,38 @@
+{
+  "docsRepository": "https://github.com/hashicorp/web-unified-docs",
+  "docsPullRequest": "https://github.com/hashicorp/web-unified-docs/pull/3332",
+  "docsCommit": "d55950c86e2dc3757df3b7bd2279b0cf96fe1679",
+  "docsPath": "content/terraform/v1.16.x/docs/language/backend/azurerm.mdx",
+  "docsBlob": "8ef5cfa992f7d148134cf304d3d39f7c236aa626",
+  "docsSha256Lf": "5c325549fc3772d096d3ce28c5578559a706c708ac72d4a7907b60beb19649c3",
+  "coreRepository": "https://github.com/jaredfholgate/terraform.git",
+  "coreCommit": "e8195f605d24299788cdf36738915d84563e4c58",
+  "corePullRequest": "https://github.com/hashicorp/terraform/pull/36922",
+  "goVersion": "1.26.4",
+  "snippets": [
+    {
+      "mode": "gh-default",
+      "heading": "GitHub Actions with separate identities in non-strict mode",
+      "hclSha256": "8f27b214a648d07b8c6a98ec030ff5abc545e2ad44ff0367c9326ace36ee3898",
+      "yamlSha256": "91b55e5ee149f636ecb5b49bfb4d8ad4f94e7e437326cdec71a74a1f3a839f6c"
+    },
+    {
+      "mode": "gh-strict",
+      "heading": "GitHub Actions with separate identities in strict mode",
+      "hclSha256": "8f27b214a648d07b8c6a98ec030ff5abc545e2ad44ff0367c9326ace36ee3898",
+      "yamlSha256": "2433bab8a7c8ad15c7c1cb0aaab80409d7fabe581e7fd25a0a30804df8795ba2"
+    },
+    {
+      "mode": "ado-default",
+      "heading": "Azure Pipelines with separate identities in non-strict mode",
+      "hclSha256": "8f27b214a648d07b8c6a98ec030ff5abc545e2ad44ff0367c9326ace36ee3898",
+      "yamlSha256": "8189da8a1e07705a0dcf7b0758207f9a254a2cc70813d229dd33ccc9c72e635e"
+    },
+    {
+      "mode": "ado-strict",
+      "heading": "Azure Pipelines with separate identities in strict mode",
+      "hclSha256": "8f27b214a648d07b8c6a98ec030ff5abc545e2ad44ff0367c9326ace36ee3898",
+      "yamlSha256": "0a912b4aab79be0513f013de71b2b32f5373c800f18a55f467d8fbbb610bb6db"
+    }
+  ]
+}
