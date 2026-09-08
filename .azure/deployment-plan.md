@@ -82,7 +82,7 @@ Keep test infrastructure for review. No automatic resource-group cleanup.
 - [x] Generate bootstrap IaC and eight CI entry points from four source examples.
 - [x] Validate Bicep and what-if.
 - [x] Deploy new infrastructure and federation.
-- [ ] Run all four same-tenant cases successfully.
+- [x] Run all four same-tenant cases successfully.
 - [ ] Validate and deploy the additional CSUTF provider resources after MFA.
 - [ ] Run all four cross-tenant cases successfully.
 - [ ] Return sanitized evidence.
@@ -140,3 +140,17 @@ GitHub's repository OIDC configuration returns subject prefix
 The new GitHub credentials use this exact prefix plus `:ref:refs/heads/main`.
 The initial name-only subject was rejected with AADSTS700213; no repository/org
 OIDC configuration or RBAC was changed to correct it.
+
+## Same-tenant live results
+
+All four runs succeeded on 2026-09-08 using harness
+`da708b332389cd72f62dee532dd728198b4a313e`. Their sanitized build/identity/resource
+evidence and run URLs are preserved in `results/same-tenant/manifest.json`.
+GitHub runs: `34222433385` (default), `34222437502` (strict).
+ADO builds: `138` (default), `139` (strict).
+
+Each built core `0c5e9bef8b6d76866b0f0ddedab5b72af51bcc27` with Go 1.26.4 and
+reported Terraform 1.17.0-dev. All four binary SHA-256 values are
+`6256a318b480ad095855740dfcfde6cd940d8c585ab92e5688cc23090822702e`.
+Init, plan, identity/resource assertions and cleanup succeeded. No apply occurred.
+Cross-tenant execution is still blocked on the separate CSUTF MFA sign-in.

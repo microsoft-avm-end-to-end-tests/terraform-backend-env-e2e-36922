@@ -5,6 +5,18 @@ separate backend/provider identities in default and strict environment-variable 
 The CI examples do not provision infrastructure. The separate `infra` bootstrap
 creates only the isolated test resources recorded in `.azure\deployment-plan.md`.
 
+## Live results
+
+The four same-tenant cases passed on 2026-09-08. Sanitized evidence is preserved in
+[`results/same-tenant`](results/same-tenant); no plans, state or tokens are included.
+
+| Platform | Non-strict | Strict |
+| --- | --- | --- |
+| GitHub Actions | [Passed](https://github.com/microsoft-avm-end-to-end-tests/terraform-backend-env-e2e-36922/actions/runs/34222433385) | [Passed](https://github.com/microsoft-avm-end-to-end-tests/terraform-backend-env-e2e-36922/actions/runs/34222437502) |
+| Azure Pipelines | [Passed](https://dev.azure.com/microsoft-avm-end-to-end-tests/terraform-backend-env-e2e-36922/_build/results?buildId=138) | [Passed](https://dev.azure.com/microsoft-avm-end-to-end-tests/terraform-backend-env-e2e-36922/_build/results?buildId=139) |
+
+The four additional cross-tenant cases await CSUTF MFA and provider deployment.
+
 ## Pinned sources
 
 - Core: [`jaredfholgate/terraform@0c5e9bef8b6d76866b0f0ddedab5b72af51bcc27`](https://github.com/jaredfholgate/terraform/commit/0c5e9bef8b6d76866b0f0ddedab5b72af51bcc27),

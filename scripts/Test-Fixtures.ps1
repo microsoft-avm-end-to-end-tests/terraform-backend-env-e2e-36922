@@ -32,38 +32,80 @@ foreach ($file in Get-ChildItem $PSScriptRoot -Filter '*.ps1') {
     Assert-Parses (Get-Content $file.FullName -Raw) $file.Name
 }
 $inlineCount = 0
-foreach ($mode in $script:Modes.Keys) {
+$yamlCount = 0
+$runnableCases = foreach ($topology in 'same-tenant', 'cross-tenant') {
+    foreach ($mode in $script:Modes.Keys) {
+        @{
+            Mode = $mode
+            Topology = $topology
+            Name = if ($topology -eq 'cross-tenant') { $mode -replace '^(gh|ado)-', '$1-cross-' } else { $mode }
+        }
+    }
+}
+foreach ($case in $runnableCases) {
+    $mode = $case.Mode
+    $caseName = $case.Name
+    $cross = $case.Topology -eq 'cross-tenant'
     $hcl = Get-Content (Join-Path $script:RepositoryRoot "examples\$mode\main.tf") -Raw
     if ($hcl -notmatch 'required_version = ">= 1\.17\.0"') {
         throw 'Preserve the documented core-version constraint; prerelease constraints are invalid.'
     }
     $github = $mode.StartsWith('gh-')
-    $path = if ($github) { ".github\workflows\$mode.yml" } else { ".ado\$mode.yml" }
+    $path = if ($github) { ".github\workflows\$caseName.yml" } else { ".ado\$caseName.yml" }
     $yaml = ConvertTo-Lf (Get-Content (Join-Path $script:RepositoryRoot $path) -Raw)
+    $yamlCount++
     foreach ($body in Get-InlineScripts $yaml) {
-        Assert-Parses $body "$mode inline script"
+        Assert-Parses $body "$caseName inline script"
         $inlineCount++
+    }
+    $initializer = [regex]::Escape("Initialize-Run.ps1 -Mode $mode")
+    $topologyArgument = if ($cross) { ' -Topology cross-tenant' } else { '(?: -Topology same-tenant)?' }
+    if ($yaml -notmatch "(?m)$initializer$topologyArgument\s*$") {
+        throw "$caseName must initialize the original fixture mode with the correct topology."
+    }
+    foreach ($scriptName in 'Assert-Run', 'Test-Plan') {
+        if ($yaml -notmatch "$([regex]::Escape("$scriptName.ps1"))`" -Mode $([regex]::Escape($mode))\b") {
+            throw "$caseName must retain the original assertion mode."
+        }
+    }
+    $providerPrefix = if ($cross) { 'CSUTF_' } else { '' }
+    foreach ($field in 'CLIENT_ID', 'OBJECT_ID', 'TENANT_ID', 'SUBSCRIPTION_ID') {
+        $reference = if ($github) {
+            '${{ vars.' + $providerPrefix + "AZAPI_$field" + ' }}'
+        } else {
+            '$(' + $providerPrefix + "AZAPI_$field" + ')'
+        }
+        if ($yaml -notmatch "(?m)^\s+AZAPI_${field}: $([regex]::Escape($reference))$") {
+            throw "$caseName must map the provider $field into the shared AZAPI environment contract."
+        }
+    }
+    $wrongProviderReference = if ($cross) { '(?:vars\.|\$\()AZAPI_' } else { 'CSUTF_AZAPI_' }
+    if ($yaml -match $wrongProviderReference -or $yaml -match 'CSUTF_STATE_') {
+        throw "$caseName mixes provider topology or changes backend variable references."
+    }
+    if ($yaml -notmatch "evidence-$([regex]::Escape($caseName))-" -or
+        $yaml -match 'ARM_(?:BACKEND_)?OIDC_REQUEST_(URL|TOKEN)') {
+        throw "$caseName must use topology-aware evidence names and native OIDC broker fallback."
     }
     if ($github) {
         if ($yaml -notmatch '(?m)^on:\n  workflow_dispatch:' -or $yaml -match '(?m)^  (push|pull_request|schedule|workflow_run|workflow_call):') {
-            throw "$mode must be manually dispatched only."
+            throw "$caseName must be manually dispatched only."
         }
         if ($yaml -notmatch 'id-token: write' -or $yaml -notmatch 'contents: read') { throw 'Missing minimum GitHub permissions.' }
-        if ($yaml -match 'ARM_BACKEND_OIDC_REQUEST_(URL|TOKEN)') {
-            throw 'Both GitHub modes must use native job broker fallback without explicit copies.'
-        }
     } else {
         if ($yaml -notmatch '(?m)^trigger: none\npr: none$') { throw 'ADO trigger and PR trigger must be disabled.' }
         if ([regex]::Matches($yaml, 'task: AzureCLI@2').Count -ne 2 -or
             [regex]::Matches($yaml, 'SYSTEM_ACCESSTOKEN: \$\(System.AccessToken\)').Count -ne 2) {
             throw 'ADO init and plan must remain separate authenticated tasks.'
         }
-        if ($yaml -notmatch 'azureSubscription: sc-tf36922-state' -or $yaml -notmatch 'azureSubscription: sc-tf36922-provider') {
+        $providerConnection = if ($cross) { 'sc-tf36922-csutf-provider' } else { 'sc-tf36922-provider' }
+        $connections = @([regex]::Matches($yaml, '(?m)^\s+azureSubscription: ([^\s]+)$') | ForEach-Object { $_.Groups[1].Value })
+        if ($connections.Count -ne 2 -or $connections[0] -ne 'sc-tf36922-state' -or $connections[1] -ne $providerConnection) {
             throw 'Unexpected service connection names.'
         }
     }
     foreach ($command in 'init', 'plan') {
-        if ([regex]::Matches($yaml, "(?m)^\s*terraform $command ").Count -ne 1) { throw "Expected one $command in $mode." }
+        if ([regex]::Matches($yaml, "(?m)^\s*terraform $command ").Count -ne 1) { throw "Expected one $command in $caseName." }
     }
     if ($yaml -match '(?m)^\s*terraform (apply|import|destroy)\b' -or $yaml -match 'setup-terraform|TerraformInstaller@') {
         throw 'A fixture must not apply/import/destroy or install a released Terraform binary.'
@@ -85,16 +127,16 @@ $baseExpected = @{
     STATE_TENANT_ID = '88888888-8888-8888-8888-888888888888'
     STATE_SUBSCRIPTION_ID = '99999999-9999-9999-9999-999999999999'
 }
-$testCases = foreach ($topology in 'same-tenant', 'cross-tenant') {
-    foreach ($mode in $script:Modes.Keys) {
-        $expected = $baseExpected.Clone()
-        $expected.TOPOLOGY = $topology
-        if ($topology -eq 'same-tenant') {
-            $expected.STATE_TENANT_ID = $expected.AZAPI_TENANT_ID
-            $expected.STATE_SUBSCRIPTION_ID = $expected.AZAPI_SUBSCRIPTION_ID
-        }
-        @{ Mode = $mode; Expected = $expected }
+$testCases = foreach ($case in $runnableCases) {
+    $mode = $case.Mode
+    $topology = $case.Topology
+    $expected = $baseExpected.Clone()
+    $expected.TOPOLOGY = $topology
+    if ($topology -eq 'same-tenant') {
+        $expected.STATE_TENANT_ID = $expected.AZAPI_TENANT_ID
+        $expected.STATE_SUBSCRIPTION_ID = $expected.AZAPI_SUBSCRIPTION_ID
     }
+    @{ Mode = $mode; Expected = $expected }
 }
 
 function Get-InvalidExpectedValue([System.Collections.IDictionary] $Expected, [string] $Field) {
@@ -258,20 +300,36 @@ foreach ($case in $testCases) {
         if (-not $rejected) { throw "$mode accepted missing/incorrect topology." }
         $passed++
     }
-    $savedObjectId = [Environment]::GetEnvironmentVariable('HARNESS_EXPECTED_AZAPI_OBJECT_ID')
+    $savedExpectedEnvironment = @{}
+    foreach ($key in $expected.Keys) {
+        $name = "HARNESS_EXPECTED_$key"
+        $savedExpectedEnvironment[$name] = [Environment]::GetEnvironmentVariable($name)
+    }
     try {
-        $environmentExpected = $expected.Clone()
-        $environmentExpected.Remove('AZAPI_OBJECT_ID')
-        $env:HARNESS_EXPECTED_AZAPI_OBJECT_ID = $expected.AZAPI_OBJECT_ID
+        foreach ($key in $expected.Keys) {
+            [Environment]::SetEnvironmentVariable("HARNESS_EXPECTED_$key", $expected[$key])
+        }
+        $environmentExpected = Get-ExpectedIdentities
+        if ($environmentExpected.AZAPI_OBJECT_ID -ne $expected.AZAPI_OBJECT_ID -or
+            $environmentExpected.TOPOLOGY -ne $expected.TOPOLOGY) {
+            throw 'Expected identity loader must preserve object ID and topology.'
+        }
         $null = Assert-PlanData $fixture $environmentExpected $mode
+        $passed++
+        $environmentExpected.Remove('AZAPI_OBJECT_ID')
+        $rejected = $false
+        try { $null = Assert-PlanData $fixture $environmentExpected $mode } catch { $rejected = $true }
+        if (-not $rejected) { throw "$mode accepted an expected identity without object ID." }
         $passed++
         $env:HARNESS_EXPECTED_AZAPI_OBJECT_ID = $null
         $rejected = $false
-        try { $null = Assert-PlanData $fixture $environmentExpected $mode } catch { $rejected = $true }
+        try { $null = Get-ExpectedIdentities } catch { $rejected = $true }
         if (-not $rejected) { throw "$mode accepted missing expected object-ID metadata." }
         $passed++
     } finally {
-        [Environment]::SetEnvironmentVariable('HARNESS_EXPECTED_AZAPI_OBJECT_ID', $savedObjectId)
+        foreach ($name in $savedExpectedEnvironment.Keys) {
+            [Environment]::SetEnvironmentVariable($name, $savedExpectedEnvironment[$name])
+        }
     }
 }
 $authNames = @(
@@ -411,4 +469,4 @@ try {
     Remove-Item -LiteralPath $initializeDirectory -Recurse -Force
 }
 & "$PSScriptRoot\Test-BuildTerraform.ps1"
-Write-Host "PASS: source extraction, $inlineCount inline PowerShell blocks, all scripts, $passed plan cases, $initializePassed initializer cases and $authPassed runtime auth cases. No Azure/CI operations performed."
+Write-Host "PASS: source extraction, $yamlCount runnable YAMLs, $inlineCount inline PowerShell blocks, all scripts, $passed plan cases, $initializePassed initializer cases and $authPassed runtime auth cases. No Azure/CI operations performed."

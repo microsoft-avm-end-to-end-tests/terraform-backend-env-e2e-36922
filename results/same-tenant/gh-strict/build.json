@@ -1,0 +1,8 @@
+{
+  "repository": "https://github.com/jaredfholgate/terraform.git",
+  "commit": "0c5e9bef8b6d76866b0f0ddedab5b72af51bcc27",
+  "goVersion": "1.26.4",
+  "terraformVersion": "1.17.0-dev",
+  "binarySha256": "6256a318b480ad095855740dfcfde6cd940d8c585ab92e5688cc23090822702e",
+  "buildCommand": "go build -trimpath -buildvcs=true -o <binary> ."
+}
