@@ -39,6 +39,7 @@ jobs:
           .\scripts\Initialize-Run.ps1 -Mode gh-default
         env:
           AZAPI_CLIENT_ID: ${{ vars.AZAPI_CLIENT_ID }}
+          AZAPI_OBJECT_ID: ${{ vars.AZAPI_OBJECT_ID }}
           AZAPI_TENANT_ID: ${{ vars.AZAPI_TENANT_ID }}
           AZAPI_SUBSCRIPTION_ID: ${{ vars.AZAPI_SUBSCRIPTION_ID }}
           STATE_CLIENT_ID: ${{ vars.STATE_CLIENT_ID }}

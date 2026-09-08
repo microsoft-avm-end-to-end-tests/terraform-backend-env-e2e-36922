@@ -3,7 +3,7 @@ targetScope = 'subscription'
 param location string = 'westeurope'
 param prefix string = 'tf36922-e8195f'
 param storageAccountName string = 'sttf36922e8195f'
-param githubRepository string = 'microsoft-avm-end-to-end-tests/terraform-backend-env-e2e-36922'
+param githubSubjectPrefix string = 'repo:microsoft-avm-end-to-end-tests@177230035/terraform-backend-env-e2e-36922@1361231930'
 
 var tags = {
   purpose: 'terraform-backend-env-e2e'
@@ -34,7 +34,7 @@ module state './state.bicep' = {
   params: {
     location: location
     storageAccountName: storageAccountName
-    githubRepository: githubRepository
+    githubSubjectPrefix: githubSubjectPrefix
     tags: tags
   }
 }

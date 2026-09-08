@@ -1,6 +1,6 @@
 param location string
 param storageAccountName string
-param githubRepository string
+param githubSubjectPrefix string
 param tags object
 
 resource identities 'Microsoft.ManagedIdentity/userAssignedIdentities@2024-11-30' = [for purpose in ['state', 'provider']: {
@@ -9,15 +9,13 @@ resource identities 'Microsoft.ManagedIdentity/userAssignedIdentities@2024-11-30
   tags: tags
 }]
 
-resource githubCredentials 'Microsoft.ManagedIdentity/userAssignedIdentities/federatedIdentityCredentials@2024-11-30' = [for (purpose, i) in ['state', 'provider']: {
-  parent: identities[i]
-  name: 'github-main'
-  properties: {
-    issuer: 'https://token.actions.githubusercontent.com'
-    subject: 'repo:${githubRepository}:ref:refs/heads/main'
-    audiences: ['api://AzureADTokenExchange']
+module githubCredentials './github-federation.bicep' = {
+  name: 'tf36922-github-credentials'
+  params: {
+    githubSubjectPrefix: githubSubjectPrefix
   }
-}]
+  dependsOn: [identities]
+}
 
 resource account 'Microsoft.Storage/storageAccounts@2025-01-01' = {
   name: storageAccountName

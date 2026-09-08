@@ -14,6 +14,7 @@ steps:
     displayName: Validate fixtures and prepare isolated run
     env:
       AZAPI_CLIENT_ID: $(AZAPI_CLIENT_ID)
+      AZAPI_OBJECT_ID: $(AZAPI_OBJECT_ID)
       AZAPI_TENANT_ID: $(AZAPI_TENANT_ID)
       AZAPI_SUBSCRIPTION_ID: $(AZAPI_SUBSCRIPTION_ID)
       STATE_CLIENT_ID: $(STATE_CLIENT_ID)
