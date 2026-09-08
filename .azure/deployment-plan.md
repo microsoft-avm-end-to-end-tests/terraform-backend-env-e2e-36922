@@ -90,8 +90,8 @@ Keep test infrastructure for review. No automatic resource-group cleanup.
 - [x] CSUTF authentication, inventory, permissions, region and policy checks.
 - [x] CSUTF Bicep compilation, template validation and what-if.
 - [x] CSUTF static role verification and live scoped-role verification.
-- [ ] Run all four cross-tenant cases successfully.
-- [ ] Return sanitized evidence.
+- [x] Run all four cross-tenant cases successfully.
+- [x] Return sanitized evidence.
 
 ## 7. Validation proof
 
@@ -210,3 +210,17 @@ Cross-tenant ADO definitions `376` (default) and `377` (strict) were enabled onl
 after real identity/connection configuration, federation and scoped authorization.
 Use `infra/New-TestPipeline.ps1 -ConfigureExisting -Topology cross-tenant` with the
 real client/object/connection IDs to reproduce that configuration.
+
+## Cross-tenant live results
+
+All four additional cases succeeded on 2026-09-08 using harness
+`0bde9f1afb2b922787e2778dfa56b5c02d024bf5`. GitHub runs:
+`34227849141` (default), `34227854211` (strict). ADO builds:
+`142` (default), `143` (strict). Both ADO runs completed successfully at
+13:07 UTC, including post-job cache and checkout steps.
+
+Sanitized build/plan evidence, run/job/artifact IDs, and the verified ARM identity
+and RBAC mapping are preserved in `results/cross-tenant/`. All eight required
+cases now pass with the same core/docs pins and binary SHA-256 above. Only init,
+plan and in-memory JSON inspection were performed; no apply/import occurred.
+All original assets and successful runs remain unchanged.

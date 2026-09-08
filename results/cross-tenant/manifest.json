@@ -1,0 +1,49 @@
+{
+  "date": "2026-09-08",
+  "topology": "cross-tenant",
+  "harnessCommit": "0bde9f1afb2b922787e2778dfa56b5c02d024bf5",
+  "coreCommit": "0c5e9bef8b6d76866b0f0ddedab5b72af51bcc27",
+  "docsCommit": "1281ae9db0b308bf26c12d157b105f189e6681db",
+  "scope": ["init", "plan", "show-json-in-memory"],
+  "applied": false,
+  "identityMapping": "infrastructure.json",
+  "sameTenantEvidence": "../same-tenant/manifest.json",
+  "runs": [
+    {
+      "mode": "gh-default",
+      "runId": 34227849141,
+      "jobId": 102066292864,
+      "artifactId": 10056554293,
+      "url": "https://github.com/microsoft-avm-end-to-end-tests/terraform-backend-env-e2e-36922/actions/runs/34227849141",
+      "result": "success"
+    },
+    {
+      "mode": "gh-strict",
+      "runId": 34227854211,
+      "jobId": 102066309021,
+      "artifactId": 10056564451,
+      "url": "https://github.com/microsoft-avm-end-to-end-tests/terraform-backend-env-e2e-36922/actions/runs/34227854211",
+      "result": "success"
+    },
+    {
+      "mode": "ado-default",
+      "definitionId": 376,
+      "runId": 142,
+      "jobId": "12f1170f-54f2-53f3-20dd-22fc7dff55f9",
+      "artifactId": 6,
+      "artifactName": "evidence-ado-cross-default-142-1",
+      "url": "https://dev.azure.com/microsoft-avm-end-to-end-tests/terraform-backend-env-e2e-36922/_build/results?buildId=142",
+      "result": "succeeded"
+    },
+    {
+      "mode": "ado-strict",
+      "definitionId": 377,
+      "runId": 143,
+      "jobId": "12f1170f-54f2-53f3-20dd-22fc7dff55f9",
+      "artifactId": 7,
+      "artifactName": "evidence-ado-cross-strict-143-1",
+      "url": "https://dev.azure.com/microsoft-avm-end-to-end-tests/terraform-backend-env-e2e-36922/_build/results?buildId=143",
+      "result": "succeeded"
+    }
+  ]
+}

@@ -7,18 +7,21 @@ creates only the isolated test resources recorded in `.azure\deployment-plan.md`
 
 ## Live results
 
-The four same-tenant cases passed on 2026-09-08. Sanitized evidence is preserved in
-[`results/same-tenant`](results/same-tenant); no plans, state or tokens are included.
+All eight cases passed on 2026-09-08. Sanitized evidence is preserved in
+[`results/same-tenant`](results/same-tenant) and
+[`results/cross-tenant`](results/cross-tenant); no plans, state or tokens are included.
 
-| Platform | Non-strict | Strict |
-| --- | --- | --- |
-| GitHub Actions | [Passed](https://github.com/microsoft-avm-end-to-end-tests/terraform-backend-env-e2e-36922/actions/runs/34222433385) | [Passed](https://github.com/microsoft-avm-end-to-end-tests/terraform-backend-env-e2e-36922/actions/runs/34222437502) |
-| Azure Pipelines | [Passed](https://dev.azure.com/microsoft-avm-end-to-end-tests/terraform-backend-env-e2e-36922/_build/results?buildId=138) | [Passed](https://dev.azure.com/microsoft-avm-end-to-end-tests/terraform-backend-env-e2e-36922/_build/results?buildId=139) |
+| Topology | Platform | Non-strict | Strict |
+| --- | --- | --- | --- |
+| Same tenant | GitHub Actions | [Passed](https://github.com/microsoft-avm-end-to-end-tests/terraform-backend-env-e2e-36922/actions/runs/34222433385) | [Passed](https://github.com/microsoft-avm-end-to-end-tests/terraform-backend-env-e2e-36922/actions/runs/34222437502) |
+| Same tenant | Azure Pipelines | [Passed](https://dev.azure.com/microsoft-avm-end-to-end-tests/terraform-backend-env-e2e-36922/_build/results?buildId=138) | [Passed](https://dev.azure.com/microsoft-avm-end-to-end-tests/terraform-backend-env-e2e-36922/_build/results?buildId=139) |
+| Cross tenant | GitHub Actions | [Passed](https://github.com/microsoft-avm-end-to-end-tests/terraform-backend-env-e2e-36922/actions/runs/34227849141) | [Passed](https://github.com/microsoft-avm-end-to-end-tests/terraform-backend-env-e2e-36922/actions/runs/34227854211) |
+| Cross tenant | Azure Pipelines | [Passed](https://dev.azure.com/microsoft-avm-end-to-end-tests/terraform-backend-env-e2e-36922/_build/results?buildId=142) | [Passed](https://dev.azure.com/microsoft-avm-end-to-end-tests/terraform-backend-env-e2e-36922/_build/results?buildId=143) |
 
 The cross-tenant provider is deployed in a separate tenant/subscription with
-four resource-group-scoped Contributor assignments. Both cross-tenant GitHub
-cases passed; the Azure Pipelines cases are in progress. Inspected evidence is
-preserved separately in [`results/cross-tenant`](results/cross-tenant).
+four resource-group-scoped Contributor assignments. Live ARM mappings and plan
+JSON confirm distinct backend/provider clients, objects, tenants and subscriptions.
+All eight builds produced the same pinned-source binary SHA-256.
 
 ## Pinned sources
 
