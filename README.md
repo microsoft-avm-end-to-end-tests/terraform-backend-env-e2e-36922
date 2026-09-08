@@ -16,6 +16,9 @@ The four same-tenant cases passed on 2026-09-08. Sanitized evidence is preserved
 | Azure Pipelines | [Passed](https://dev.azure.com/microsoft-avm-end-to-end-tests/terraform-backend-env-e2e-36922/_build/results?buildId=138) | [Passed](https://dev.azure.com/microsoft-avm-end-to-end-tests/terraform-backend-env-e2e-36922/_build/results?buildId=139) |
 
 The four additional cross-tenant cases await CSUTF MFA and provider deployment.
+Their ADO definitions [376](https://dev.azure.com/microsoft-avm-end-to-end-tests/terraform-backend-env-e2e-36922/_build?definitionId=376)
+and [377](https://dev.azure.com/microsoft-avm-end-to-end-tests/terraform-backend-env-e2e-36922/_build?definitionId=377)
+exist but are disabled until real provider IDs and the new service connection are configured.
 
 ## Pinned sources
 
