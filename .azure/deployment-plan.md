@@ -2,7 +2,7 @@
 
 Status: Deployed
 
-CSUTF extension status: Approved; live access validation blocked on MFA.
+CSUTF extension status: Deployed.
 
 ## Scope and approval
 
@@ -35,11 +35,14 @@ The new provider gets only four target-group Contributor assignments and
 GitHub-main/ADO-connection federation. Create `sc-tf36922-csutf-provider`; retain
 the original provider assets/connection for the four same-tenant cases. No subscription-wide grants.
 
-CSUTF extension limits/policy checks remain pending live ARM access. Cached
-subscription metadata confirms tenant and Enabled state, but ARM returned
-AADSTS50076 (MFA required) on 2026-09-08 at 11:33 UTC. No CSUTF resource operation
-has been performed. Validate inventory, permissions, limits, policies and what-if
-before deploying the extension.
+CSUTF MFA completed in an isolated CLI profile. Live preflight on 2026-09-08 at
+12:38 UTC confirmed the authorized tenant/subscription, Enabled state, all five
+new group names absent, unrestricted resource-management/role-assignment actions,
+and Microsoft.ManagedIdentity registered with West Europe support. Inventory-based
+limits: groups 3+5=8/980, role assignments 141+4=145/4000, one identity in a new
+group (<800 ARM type bound), two federated credentials/20. These resource types
+use the documented limits rather than unsupported quota endpoints. Only the
+audit-only SecurityCenterBuiltIn policy assignment was returned.
 
 - New state group: `rg-tf36922-e8195f-state`.
 - New Standard_LRS StorageV2 account: `sttf36922e8195f`; container: `tfstate`.
@@ -83,9 +86,12 @@ Keep test infrastructure for review. No automatic resource-group cleanup.
 - [x] Validate Bicep and what-if.
 - [x] Deploy new infrastructure and federation.
 - [x] Run all four same-tenant cases successfully.
-- [ ] Validate and deploy the additional CSUTF provider resources after MFA.
-- [ ] Run all four cross-tenant cases successfully.
-- [ ] Return sanitized evidence.
+- [x] Validate and deploy the additional CSUTF provider resources after MFA.
+- [x] CSUTF authentication, inventory, permissions, region and policy checks.
+- [x] CSUTF Bicep compilation, template validation and what-if.
+- [x] CSUTF static role verification and live scoped-role verification.
+- [x] Run all four cross-tenant cases successfully.
+- [x] Return sanitized evidence.
 
 ## 7. Validation proof
 
@@ -112,6 +118,30 @@ included in the preview.
 Raw validation and what-if JSON are retained in session artifacts, not published
 as CI evidence. Federation validation follows issuer/subject discovery from the
 two new connections.
+
+CSUTF preflight proof is retained in `csutf-preflight.json` in session artifacts.
+The additional template creates only five new groups, one new provider identity
+and its GitHub credential. Each of its four role modules targets a new case group
+and grants only Contributor to the new identity. No state resources or original
+provider resources are included.
+
+On 2026-09-08, `az bicep build --file .\infra\provider-main.bicep` and
+`az deployment sub validate --subscription 66bd4c09-0b95-49f7-9db1-a8f69c54e827
+--location westeurope --template-file .\infra\provider-main.bicep` succeeded.
+Validation correlation: `0be7c16e-27d4-4c8f-86d3-b332839792f9`.
+The matching `az deployment sub what-if` returned seven Create changes, zero
+Modify/Delete changes, and four Unsupported role-assignment IDs dependent on the
+new identity's principal ID. Static review confirms these are only the four new
+group-scoped Contributor assignments. Live verification will check the resolved
+roles after deployment. Results are retained as `csutf-validation.json` and
+`csutf-whatif.json`. The existing eight-case fixture regression command
+`.\scripts\Test-Fixtures.ps1` also passed.
+
+CSUTF ADO federation validation succeeded with correlation
+`c8f293ee-4a3c-445a-82c8-081efbb0985b`. Its preview contains exactly one Create
+for `ado-service-connection` and one Ignore for the existing test-owned identity,
+with no Modify/Delete changes. The credential uses the issuer/subject returned by
+new connection `102bb8ab-971a-481f-89bd-73d9ce44ea54`.
 
 ## Deployment evidence
 
@@ -141,6 +171,29 @@ The new GitHub credentials use this exact prefix plus `:ref:refs/heads/main`.
 The initial name-only subject was rejected with AADSTS700213; no repository/org
 OIDC configuration or RBAC was changed to correct it.
 
+## CSUTF deployment evidence
+
+CSUTF provider bootstrap succeeded with correlation
+`5fc1ab6b-dd7a-42e3-85c3-2f6af605bc4a`. Live ARM mapping:
+client `446149dc-4e22-4d60-9d3f-dfd346db577e`,
+object `3dbdaad5-e792-4efb-9fdc-a5dcad3d038d`.
+Exactly four Contributor assignments were verified, one per new CSUTF target
+group and no subscription-wide assignment. GitHub federation matches the exact
+immutable-ID subject above. Backend client/object mapping was independently
+re-read from its original subscription and remains unchanged.
+
+ADO federation deployment succeeded with correlation
+`5fbfeeb6-27c6-414a-accc-e28aa9ddd190`. Live credential issuer/subject/audience
+match the exact new connection response. Both cross-tenant definitions use the
+new project's Azure Pipelines hosted queue 3121 (pool 9), with only the state
+connection and new CSUTF provider connection authorized.
+
+The cross definitions contain only `CSUTF_AZAPI_*` provider variables, not the
+original provider's `AZAPI_*` globals. The latter shadowed the explicit task
+environment in builds 140/141 and were rejected by the topology assertion before
+Terraform build/authentication. Removing those conflicting globals allowed
+builds 142/143 to pass fixture initialization without changing the docs scripts.
+
 ## Same-tenant live results
 
 All four runs succeeded on 2026-09-08 using harness
@@ -153,11 +206,21 @@ Each built core `0c5e9bef8b6d76866b0f0ddedab5b72af51bcc27` with Go 1.26.4 and
 reported Terraform 1.17.0-dev. All four binary SHA-256 values are
 `6256a318b480ad095855740dfcfde6cd940d8c585ab92e5688cc23090822702e`.
 Init, plan, identity/resource assertions and cleanup succeeded. No apply occurred.
-Cross-tenant execution is still blocked on the separate CSUTF MFA sign-in.
+Cross-tenant ADO definitions `376` (default) and `377` (strict) were enabled only
+after real identity/connection configuration, federation and scoped authorization.
+Use `infra/New-TestPipeline.ps1 -ConfigureExisting -Topology cross-tenant` with the
+real client/object/connection IDs to reproduce that configuration.
 
-Cross-tenant ADO definitions `376` (default) and `377` (strict) are created with
-`queueStatus=disabled`. No placeholder identities or service connections were
-invented. Once the new CSUTF identity/connection exists, use
-`infra/New-TestPipeline.ps1 -ConfigureExisting -Topology cross-tenant` with the
-real client/object/connection IDs to set variables, authorize only the two intended
-connections, and enable each prepared definition.
+## Cross-tenant live results
+
+All four additional cases succeeded on 2026-09-08 using harness
+`0bde9f1afb2b922787e2778dfa56b5c02d024bf5`. GitHub runs:
+`34227849141` (default), `34227854211` (strict). ADO builds:
+`142` (default), `143` (strict). Both ADO runs completed successfully at
+13:07 UTC, including post-job cache and checkout steps.
+
+Sanitized build/plan evidence, run/job/artifact IDs, and the verified ARM identity
+and RBAC mapping are preserved in `results/cross-tenant/`. All eight required
+cases now pass with the same core/docs pins and binary SHA-256 above. Only init,
+plan and in-memory JSON inspection were performed; no apply/import occurred.
+All original assets and successful runs remain unchanged.

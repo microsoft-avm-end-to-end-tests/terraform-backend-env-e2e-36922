@@ -3,6 +3,7 @@ param([string] $DocsPath)
 
 . "$PSScriptRoot\Harness.Common.ps1"
 & "$PSScriptRoot\Export-Fixtures.ps1" -DocsPath $DocsPath -Check
+& "$PSScriptRoot\Test-PipelineConfiguration.ps1"
 
 function Assert-Parses([string] $Text, [string] $Label) {
     $tokens = $null
