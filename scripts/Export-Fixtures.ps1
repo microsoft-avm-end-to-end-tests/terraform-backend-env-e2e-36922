@@ -100,7 +100,7 @@ $githubBuild = ConvertTo-Lf @'
       - uses: actions/cache@v4
         with:
           path: .build\go
-          key: go-${{ runner.os }}-1.26.4-e8195f605d24299788cdf36738915d84563e4c58
+          key: go-${{ runner.os }}-1.26.4-__CORE_COMMIT__
 
       - name: Build pinned Terraform source (never a release binary)
         shell: pwsh
@@ -146,7 +146,7 @@ $adoBuild = ConvertTo-Lf @'
   - task: Cache@2
     displayName: Cache Go modules and compilation only
     inputs:
-      key: '"go" | "$(Agent.OS)" | "1.26.4" | "e8195f605d24299788cdf36738915d84563e4c58"'
+      key: '"go" | "$(Agent.OS)" | "1.26.4" | "__CORE_COMMIT__"'
       path: '$(Build.SourcesDirectory)\.build\go'
 
   - pwsh: .\scripts\Build-Terraform.ps1 -CI AzurePipelines
@@ -168,7 +168,6 @@ $adoEnd = ConvertTo-Lf @'
 
 foreach ($mode in $script:Modes.Keys) {
     $hcl = $files["examples\source\$mode\main.tf"]
-    $hcl = Replace-Once $hcl 'required_version = ">= 1.17.0"' 'required_version = ">= 1.17.0-dev"'
     $hcl = Replace-Once $hcl 'name      = "example-resources"' "name      = `"rg-tf36922-e8195f-$mode`""
     $files["examples\$mode\main.tf"] = $hcl
 
@@ -184,7 +183,7 @@ foreach ($mode in $script:Modes.Keys) {
           terraform_version: ${{ vars.TERRAFORM_VERSION }}
           terraform_wrapper: false
 '@
-        $yaml = Replace-Once $yaml $installer $githubBuild.Replace('__MODE__', $mode)
+        $yaml = Replace-Once $yaml $installer $githubBuild.Replace('__MODE__', $mode).Replace('__CORE_COMMIT__', $script:CoreCommit)
         $indent = '          '
         $yaml += $githubEnd.Replace('__MODE__', $mode) + "`n"
         $path = ".github\workflows\$mode.yml"
@@ -199,7 +198,7 @@ foreach ($mode in $script:Modes.Keys) {
     inputs:
       terraformVersion: $(TERRAFORM_VERSION)
 '@
-        $yaml = Replace-Once $yaml $installer $adoBuild.Replace('__MODE__', $mode)
+        $yaml = Replace-Once $yaml $installer $adoBuild.Replace('__MODE__', $mode).Replace('__CORE_COMMIT__', $script:CoreCommit)
         $indent = '        '
         $yaml += $adoEnd.Replace('__MODE__', $mode) + "`n"
         $path = ".ado\$mode.yml"

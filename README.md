@@ -7,9 +7,9 @@ creates only the isolated test resources recorded in `.azure\deployment-plan.md`
 
 ## Pinned sources
 
-- Core: [`jaredfholgate/terraform@e8195f605d24299788cdf36738915d84563e4c58`](https://github.com/jaredfholgate/terraform/commit/e8195f605d24299788cdf36738915d84563e4c58),
+- Core: [`jaredfholgate/terraform@0c5e9bef8b6d76866b0f0ddedab5b72af51bcc27`](https://github.com/jaredfholgate/terraform/commit/0c5e9bef8b6d76866b0f0ddedab5b72af51bcc27),
   upstream [hashicorp/terraform#36922](https://github.com/hashicorp/terraform/pull/36922).
-- Docs: [`d55950c86e2dc3757df3b7bd2279b0cf96fe1679`](https://github.com/hashicorp/web-unified-docs/pull/3332),
+- Docs: [`1281ae9db0b308bf26c12d157b105f189e6681db`](https://github.com/hashicorp/web-unified-docs/pull/3332),
   `content/terraform/v1.16.x/docs/language/backend/azurerm.mdx`.
 - `scripts\Build-Terraform.ps1` fetches/checks out that exact fork commit and runs
   `go build -trimpath -buildvcs=true`. Go **1.26.4** is checked against both
@@ -59,16 +59,18 @@ LF-normalized document SHA-256, and individual snippet SHA-256 hashes.
 Runnable HCL lives in `examples\<mode>`. Edit the generator, not generated files.
 
 Allowed adaptations: replace release installers with the pinned source build;
-use Windows instead of Ubuntu (source scripts already use `pwsh`/`pscore`); allow
-`>= 1.17.0-dev` for the prerelease CLI; substitute the four scoped group names;
+use Windows instead of Ubuntu (source scripts already use `pwsh`/`pscore`);
+substitute the four scoped group names;
 disable ADO PR triggers; add isolated directories/unique keys, assertions,
 sanitized evidence, caches and cleanup. HCL authentication is otherwise unchanged.
+The documented `>= 1.17.0` constraint is preserved: Terraform compares development
+builds using their core version and rejects prerelease suffixes in constraints.
 
 The exact ordered authentication assignments are checked against the source:
 GitHub default overrides **only backend client/tenant**, sharing OIDC/AzureAD
-flags and the native GitHub broker. GitHub strict copies the current step's
-`ACTIONS_ID_TOKEN_REQUEST_URL/TOKEN` to `ARM_BACKEND_OIDC_REQUEST_URL/TOKEN`
-in **both** init and plan. ADO initializes in the state connection, carries only
+flags and the native GitHub broker. GitHub strict also uses the native
+`ACTIONS_ID_TOKEN_REQUEST_URL/TOKEN` in **both** init and plan, with no backend
+broker overrides. ADO initializes in the state connection, carries only
 non-secret identity/connection metadata forward, and plans in the provider
 connection. Each task maps its own `System.AccessToken`; `SYSTEM_OIDCREQUESTURI`
 remains native. Backend/provider service connection selectors and strict-mode

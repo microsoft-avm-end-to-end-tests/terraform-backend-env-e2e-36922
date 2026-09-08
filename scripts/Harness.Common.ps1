@@ -3,9 +3,9 @@ $PSNativeCommandUseErrorActionPreference = $true
 
 $script:RepositoryRoot = Split-Path $PSScriptRoot -Parent
 $script:CoreRepository = 'https://github.com/jaredfholgate/terraform.git'
-$script:CoreCommit = 'e8195f605d24299788cdf36738915d84563e4c58'
+$script:CoreCommit = '0c5e9bef8b6d76866b0f0ddedab5b72af51bcc27'
 $script:GoVersion = '1.26.4'
-$script:DocsCommit = 'd55950c86e2dc3757df3b7bd2279b0cf96fe1679'
+$script:DocsCommit = '1281ae9db0b308bf26c12d157b105f189e6681db'
 $script:DocsRelativePath = 'content/terraform/v1.16.x/docs/language/backend/azurerm.mdx'
 $script:Modes = [ordered]@{
     'gh-default' = 'GitHub Actions with separate identities in non-strict mode'

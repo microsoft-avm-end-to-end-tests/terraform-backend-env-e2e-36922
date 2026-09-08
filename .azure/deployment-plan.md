@@ -8,9 +8,9 @@ Create only new isolated development/test assets. Delegated approval: user
 requested a new repository, project, and resource groups and instructed autonomous
 context selection. No production changes, shared pools, or existing assets.
 
-Build Terraform source `e8195f605d24299788cdf36738915d84563e4c58` in both CI
+Build Terraform source `0c5e9bef8b6d76866b0f0ddedab5b72af51bcc27` in both CI
 platforms. Extract the four separate-identity examples from documentation commit
-`d55950c86e2dc3757df3b7bd2279b0cf96fe1679`. Execute init and plan, not apply.
+`1281ae9db0b308bf26c12d157b105f189e6681db`. Execute init and plan, not apply.
 Both identities are in one tenant; this is not live cross-tenant proof.
 
 ## Azure context and architecture
@@ -48,8 +48,8 @@ observed was SecurityCenterBuiltIn.
 ## Adaptations and evidence
 
 Replace released CLI installers with pinned source builds; parameterize target
-group names and unique run-specific blob keys; accept the development version
-in fixtures; add sanitized assertions. Preserve auth logic and init/plan steps.
+group names and unique run-specific blob keys; add sanitized assertions. Preserve
+the documented version constraint, auth logic and init/plan steps.
 Precreated resource groups provide scoped RBAC; plan-only examples do not
 require imports. Do not publish tokens, plans, or state.
 

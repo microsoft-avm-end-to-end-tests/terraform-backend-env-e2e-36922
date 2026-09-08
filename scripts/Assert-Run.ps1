@@ -42,12 +42,10 @@ if ($Phase -eq 'Plan' -or $github) {
     }
 }
 if ($github) {
-    $url = Get-RequiredEnvironment 'ACTIONS_ID_TOKEN_REQUEST_URL'
-    $token = Get-RequiredEnvironment 'ACTIONS_ID_TOKEN_REQUEST_TOKEN'
-    if ($strict) {
-        if ($env:ARM_BACKEND_OIDC_REQUEST_URL -cne $url -or $env:ARM_BACKEND_OIDC_REQUEST_TOKEN -cne $token) {
-            throw 'Backend GitHub broker inputs do not exactly match this step.'
-        }
+    $null = Get-RequiredEnvironment 'ACTIONS_ID_TOKEN_REQUEST_URL'
+    $null = Get-RequiredEnvironment 'ACTIONS_ID_TOKEN_REQUEST_TOKEN'
+    if ($env:ARM_BACKEND_OIDC_REQUEST_URL -or $env:ARM_BACKEND_OIDC_REQUEST_TOKEN) {
+        throw 'GitHub examples must exercise native job broker fallback without backend broker overrides.'
     }
 } else {
     $null = Get-RequiredEnvironment 'SYSTEM_OIDCREQUESTURI'
