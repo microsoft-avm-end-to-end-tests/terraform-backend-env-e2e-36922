@@ -25,6 +25,10 @@ creates only the isolated test resources recorded in `.azure\deployment-plan.md`
 | GitHub strict | `.github\workflows\gh-strict.yml` | `rg-tf36922-e8195f-gh-strict` |
 | Azure Pipelines default | `.ado\ado-default.yml` | `rg-tf36922-e8195f-ado-default` |
 | Azure Pipelines strict | `.ado\ado-strict.yml` | `rg-tf36922-e8195f-ado-strict` |
+| GitHub cross-tenant default | `.github\workflows\gh-cross-default.yml` | Same name in CSUTF |
+| GitHub cross-tenant strict | `.github\workflows\gh-cross-strict.yml` | Same name in CSUTF |
+| Azure Pipelines cross-tenant default | `.ado\ado-cross-default.yml` | Same name in CSUTF |
+| Azure Pipelines cross-tenant strict | `.ado\ado-cross-strict.yml` | Same name in CSUTF |
 
 All use Windows hosted agents and PowerShell 7. GitHub exposes only
 `workflow_dispatch`; ADO has `trigger: none` and `pr: none` (also disable any
@@ -32,15 +36,18 @@ UI-configured schedules/triggers). Use workload identity federation. Authorize b
 GitHub identities for the dispatched branch and both ADO service connections for
 each pipeline. The fixed ADO connection names are **sc-tf36922-state** and
 **sc-tf36922-provider**. No Terraform marketplace installer extension is needed.
+Cross-tenant pipelines instead use **sc-tf36922-csutf-provider** for the provider.
 
 Set these **non-secret** GitHub repository variables / ADO pipeline variables:
 
 | Variables | Meaning |
 | --- | --- |
 | `AZAPI_CLIENT_ID`, `AZAPI_TENANT_ID`, `AZAPI_SUBSCRIPTION_ID` | Expected provider identity and subscription |
+| `AZAPI_OBJECT_ID` | Provider managed identity principal ID, verified against its client ID during provisioning |
 | `STATE_CLIENT_ID`, `STATE_TENANT_ID`, `STATE_SUBSCRIPTION_ID` | Expected backend identity and subscription |
 | `STATE_STORAGE_ACCOUNT_NAME`, `STATE_CONTAINER_NAME` | Existing state storage |
 | `STATE_KEY` | Non-secret blob name/prefix, not a storage key |
+| `CSUTF_AZAPI_CLIENT_ID`, `CSUTF_AZAPI_OBJECT_ID`, `CSUTF_AZAPI_TENANT_ID`, `CSUTF_AZAPI_SUBSCRIPTION_ID` | Provider values for the four additional cross-tenant entry points |
 
 Backend and provider client IDs **must differ**. Backend access needs Storage Blob
 Data Contributor scoped to the state container; provider access is scoped to the
@@ -76,11 +83,15 @@ connection. Each task maps its own `System.AccessToken`; `SYSTEM_OIDCREQUESTURI`
 remains native. Backend/provider service connection selectors and strict-mode
 flags are preserved. No fixed assertion token or broker rewrite is introduced.
 
-**Single-tenant limitation:** with both supplied identities in one tenant, these
-runs establish identity isolation and init-to-plan behavior, not the documentation's
-cross-tenant claims. They also do not prove apply, import, cross-job handoff,
+The original four cases use separate identities in the state tenant/subscription.
+The four cross-tenant entry points keep the same backend but require the provider
+client, tenant and subscription IDs all to differ. CSUTF provider resources are
+new and isolated; no subscription-wide role is assigned.
+
+The examples do not prove apply, import, cross-job handoff,
 long-running token refresh or management-plane endpoint lookup. Plan JSON proves
-the provider identity; successful state access plus deliberately scoped RBAC and
+the provider object ID; provisioning records bind it to the expected client ID.
+Successful state access plus deliberately scoped RBAC and
 runtime environment checks are the backend evidence, not a decoded-token identity
 attestation.
 
@@ -100,7 +111,7 @@ synthetic plan identities/resources. It does not start CI or access Azure.
 Each invocation appends **mode + run ID + attempt** to `STATE_KEY`. Init and plan
 use the same `.runs\<mode>-<run>-<attempt>` directory in one job. Saved `tfplan`
 is inspected with `terraform show -json` **in memory**: assert the
-`data.azapi_client_config.current` client/tenant/subscription and the sole planned
+`data.azapi_client_config.current` object/tenant/subscription from prior state and the sole planned
 resource group's name/type/location/parent subscription/create action.
 Only allow-listed non-secret JSON in `evidence\` is published. Never publish raw
 plan/state or enable Terraform debug logging. A `finally` block and an always-run

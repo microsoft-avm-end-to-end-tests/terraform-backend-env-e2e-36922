@@ -1,12 +1,15 @@
 [CmdletBinding()]
-param([Parameter(Mandatory)][ValidateSet('gh-default', 'gh-strict', 'ado-default', 'ado-strict')][string] $Mode)
+param(
+    [Parameter(Mandatory)][ValidateSet('gh-default', 'gh-strict', 'ado-default', 'ado-strict')][string] $Mode,
+    [ValidateSet('same-tenant', 'cross-tenant')][string] $Topology = 'same-tenant'
+)
 
 . "$PSScriptRoot\Harness.Common.ps1"
 $github = $Mode.StartsWith('gh-')
 $run = Get-RequiredEnvironment $(if ($github) { 'GITHUB_RUN_ID' } else { 'BUILD_BUILDID' })
 $attempt = Get-RequiredEnvironment $(if ($github) { 'GITHUB_RUN_ATTEMPT' } else { 'SYSTEM_JOBATTEMPT' })
 if ($run -notmatch '^\d+$' -or $attempt -notmatch '^\d+$') { throw 'Invalid CI run/attempt identifiers.' }
-$variables = [ordered]@{}
+$variables = [ordered]@{ HARNESS_EXPECTED_TOPOLOGY = $Topology }
 foreach ($role in 'AZAPI', 'STATE') {
     foreach ($field in 'CLIENT_ID', 'TENANT_ID', 'SUBSCRIPTION_ID') {
         $name = "${role}_${field}"
@@ -15,9 +18,17 @@ foreach ($role in 'AZAPI', 'STATE') {
         $variables["HARNESS_EXPECTED_$name"] = $value
     }
 }
-if ($variables.HARNESS_EXPECTED_STATE_CLIENT_ID -ieq $variables.HARNESS_EXPECTED_AZAPI_CLIENT_ID) {
-    throw 'Backend and provider client IDs must be distinct.'
+foreach ($field in 'CLIENT_ID', 'TENANT_ID', 'SUBSCRIPTION_ID') {
+    $equal = [guid]$variables["HARNESS_EXPECTED_STATE_$field"] -eq [guid]$variables["HARNESS_EXPECTED_AZAPI_$field"]
+    $mustDiffer = $field -eq 'CLIENT_ID' -or $Topology -eq 'cross-tenant'
+    if ($equal -eq $mustDiffer) {
+        $relationship = if ($mustDiffer) { 'distinct' } else { 'equal' }
+        throw "Backend and provider $field must be $relationship for $Topology."
+    }
 }
+$objectId = Get-RequiredEnvironment 'AZAPI_OBJECT_ID'
+Assert-Identifier $objectId 'AZAPI_OBJECT_ID'
+$variables.HARNESS_EXPECTED_AZAPI_OBJECT_ID = $objectId
 foreach ($name in 'STATE_STORAGE_ACCOUNT_NAME', 'STATE_CONTAINER_NAME', 'STATE_KEY') {
     $null = Get-RequiredEnvironment $name
 }
@@ -41,4 +52,4 @@ foreach ($entry in $variables.GetEnumerator()) {
         Write-Host "##vso[task.setvariable variable=$($entry.Key)]$escaped"
     }
 }
-Write-Host "Prepared $id; separate backend/provider identities; init and plan only."
+Write-Host "Prepared $id; $Topology with separate backend/provider identities; init and plan only."
