@@ -154,3 +154,10 @@ reported Terraform 1.17.0-dev. All four binary SHA-256 values are
 `6256a318b480ad095855740dfcfde6cd940d8c585ab92e5688cc23090822702e`.
 Init, plan, identity/resource assertions and cleanup succeeded. No apply occurred.
 Cross-tenant execution is still blocked on the separate CSUTF MFA sign-in.
+
+Cross-tenant ADO definitions `376` (default) and `377` (strict) are created with
+`queueStatus=disabled`. No placeholder identities or service connections were
+invented. Once the new CSUTF identity/connection exists, use
+`infra/New-TestPipeline.ps1 -ConfigureExisting -Topology cross-tenant` with the
+real client/object/connection IDs to set variables, authorize only the two intended
+connections, and enable each prepared definition.

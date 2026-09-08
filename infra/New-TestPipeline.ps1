@@ -9,7 +9,8 @@ param(
     [string] $Topology = 'same-tenant',
     [string] $CsutfClientId,
     [string] $CsutfObjectId,
-    [string] $CsutfConnectionId
+    [string] $CsutfConnectionId,
+    [switch] $ConfigureExisting
 )
 $ErrorActionPreference = 'Stop'
 $PSNativeCommandUseErrorActionPreference = $true
@@ -25,16 +26,25 @@ if ($Topology -eq 'cross-tenant') {
 }
 $existing = @(az pipelines list --organization $organization --project $project `
     --name $name -o json | ConvertFrom-Json)
-if ($existing.Count) { throw "Pipeline $name already exists; inspect before updating." }
-$definition = az pipelines create --name $name --repository $project `
-    --repository-type tfsgit --branch main --yaml-path $YamlPath --skip-first-run `
-    --organization $organization --project $project -o json | ConvertFrom-Json
+if ($ConfigureExisting) {
+    if ($existing.Count -ne 1) { throw "Expected exactly one prepared pipeline named $name." }
+    $definition = $existing[0]
+} else {
+    if ($existing.Count) { throw "Pipeline $name already exists; inspect before updating." }
+    $definition = az pipelines create --name $name --repository $project `
+        --repository-type tfsgit --branch main --yaml-path $YamlPath --skip-first-run `
+        --organization $organization --project $project -o json | ConvertFrom-Json
+}
 $token = az account get-access-token --subscription $subscription `
     --resource 499b84ac-1321-427f-aa17-267ca6975798 --query accessToken -o tsv
 $headers = @{ Authorization = "Bearer $token" }
 $base = "$organization/$project"
 $definitionUri = "$base/_apis/build/definitions/$($definition.id)?api-version=7.1"
 $definition = Invoke-RestMethod -Headers $headers -Uri $definitionUri
+if ($definition.repository.id -ne 'df3508b4-890d-40b0-890b-8a39b0660f64' -or
+    $definition.process.yamlFilename -ne $YamlPath) {
+    throw 'Pipeline repository or YAML does not match this isolated harness.'
+}
 $values = @{
     AZAPI_CLIENT_ID = 'b1c4b1f6-46bc-43ff-8109-55f4d2b6cc33'
     AZAPI_OBJECT_ID = '4018377b-0c35-4934-8498-23d83f0fa11a'
@@ -65,5 +75,11 @@ foreach ($endpointId in 'a772cbab-ead7-4c84-93bf-24a22ec6ab3c', $providerConnect
     $body = @{ pipelines = @(@{ id = $definition.id; authorized = $true }) } | ConvertTo-Json -Depth 5
     $null = Invoke-RestMethod -Method Patch -Headers $headers -ContentType 'application/json' `
         -Uri "$base/_apis/pipelines/pipelinepermissions/endpoint/${endpointId}?api-version=7.1-preview.1" -Body $body
+}
+if ($ConfigureExisting) {
+    $definition = Invoke-RestMethod -Headers $headers -Uri $definitionUri
+    $definition.queueStatus = 'enabled'
+    $definition = Invoke-RestMethod -Method Put -Headers $headers -ContentType 'application/json' `
+        -Uri $definitionUri -Body ($definition | ConvertTo-Json -Depth 100)
 }
 $definition | Select-Object id, name, url | ConvertTo-Json
