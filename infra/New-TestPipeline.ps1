@@ -45,6 +45,12 @@ if ($definition.repository.id -ne 'df3508b4-890d-40b0-890b-8a39b0660f64' -or
     $definition.process.yamlFilename -ne $YamlPath) {
     throw 'Pipeline repository or YAML does not match this isolated harness.'
 }
+$queue = Invoke-RestMethod -Headers $headers `
+    -Uri "$base/_apis/distributedtask/queues/3121?api-version=7.1"
+if ($queue.pool.id -ne 9 -or -not $queue.pool.isHosted -or $queue.name -ne 'Azure Pipelines') {
+    throw 'Expected the isolated project queue for the Azure Pipelines hosted pool.'
+}
+$definition.queue = $queue
 $values = @{
     AZAPI_CLIENT_ID = 'b1c4b1f6-46bc-43ff-8109-55f4d2b6cc33'
     AZAPI_OBJECT_ID = '4018377b-0c35-4934-8498-23d83f0fa11a'
@@ -59,6 +65,9 @@ $values = @{
 }
 $variables = @{}
 if ($Topology -eq 'cross-tenant') {
+    foreach ($key in @($values.Keys)) {
+        if ($key.StartsWith('AZAPI_')) { $values.Remove($key) }
+    }
     $values.CSUTF_AZAPI_CLIENT_ID = $CsutfClientId
     $values.CSUTF_AZAPI_OBJECT_ID = $CsutfObjectId
     $values.CSUTF_AZAPI_TENANT_ID = 'dac8feee-8768-4fbd-9cf9-9d96d4718018'

@@ -1,0 +1,70 @@
+{
+  "verifiedAt": "2026-09-08T12:44:06.7906313Z",
+  "source": "live Azure Resource Manager identity and role queries",
+  "backend": {
+    "resourceId": "/subscriptions/121e2ce8-c399-4fea-958a-09d15ed949c4/resourcegroups/rg-tf36922-e8195f-state/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id-tf36922-state",
+    "clientId": "4387b74e-0954-4630-a230-4c3a766c2b34",
+    "objectId": "e73a0c9f-60b4-4c8b-983d-6c311c36af21",
+    "tenantId": "13b2a159-de04-4835-a3ad-fd814c6adb4f",
+    "subscriptionId": "121e2ce8-c399-4fea-958a-09d15ed949c4"
+  },
+  "provider": {
+    "resourceId": "/subscriptions/66bd4c09-0b95-49f7-9db1-a8f69c54e827/resourcegroups/rg-tf36922-csutf-provider/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id-tf36922-csutf-provider",
+    "clientId": "446149dc-4e22-4d60-9d3f-dfd346db577e",
+    "objectId": "3dbdaad5-e792-4efb-9fdc-a5dcad3d038d",
+    "tenantId": "dac8feee-8768-4fbd-9cf9-9d96d4718018",
+    "subscriptionId": "66bd4c09-0b95-49f7-9db1-a8f69c54e827"
+  },
+  "providerRoles": [
+    {
+      "principalId": "3dbdaad5-e792-4efb-9fdc-a5dcad3d038d",
+      "roleDefinitionId": "/subscriptions/66bd4c09-0b95-49f7-9db1-a8f69c54e827/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c",
+      "scope": "/subscriptions/66bd4c09-0b95-49f7-9db1-a8f69c54e827/resourcegroups/rg-tf36922-e8195f-ado-strict"
+    },
+    {
+      "principalId": "3dbdaad5-e792-4efb-9fdc-a5dcad3d038d",
+      "roleDefinitionId": "/subscriptions/66bd4c09-0b95-49f7-9db1-a8f69c54e827/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c",
+      "scope": "/subscriptions/66bd4c09-0b95-49f7-9db1-a8f69c54e827/resourcegroups/rg-tf36922-e8195f-ado-default"
+    },
+    {
+      "principalId": "3dbdaad5-e792-4efb-9fdc-a5dcad3d038d",
+      "roleDefinitionId": "/subscriptions/66bd4c09-0b95-49f7-9db1-a8f69c54e827/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c",
+      "scope": "/subscriptions/66bd4c09-0b95-49f7-9db1-a8f69c54e827/resourcegroups/rg-tf36922-e8195f-gh-default"
+    },
+    {
+      "principalId": "3dbdaad5-e792-4efb-9fdc-a5dcad3d038d",
+      "roleDefinitionId": "/subscriptions/66bd4c09-0b95-49f7-9db1-a8f69c54e827/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c",
+      "scope": "/subscriptions/66bd4c09-0b95-49f7-9db1-a8f69c54e827/resourcegroups/rg-tf36922-e8195f-gh-strict"
+    }
+  ],
+  "providerFederation": [
+    {
+      "name": "github-main",
+      "issuer": "https://token.actions.githubusercontent.com",
+      "subject": "repo:microsoft-avm-end-to-end-tests@177230035/terraform-backend-env-e2e-36922@1361231930:ref:refs/heads/main",
+      "audiences": [
+        "api://AzureADTokenExchange"
+      ]
+    },
+    {
+      "name": "ado-service-connection",
+      "issuer": "https://login.microsoftonline.com/dac8feee-8768-4fbd-9cf9-9d96d4718018/v2.0",
+      "subject": "/eid1/c/pub/t/7v7I2miHvU-c-Z2W1HGAGA/a/rISbSSETf0KqFyZ8ppdXmA/sc/841414f8-35cc-4c26-9145-c2459794940e/102bb8ab-971a-481f-89bd-73d9ce44ea54",
+      "audiences": [
+        "api://AzureADTokenExchange"
+      ]
+    }
+  ],
+  "providerServiceConnectionId": "102bb8ab-971a-481f-89bd-73d9ce44ea54",
+  "bootstrapCorrelationId": "5fc1ab6b-dd7a-42e3-85c3-2f6af605bc4a",
+  "federationCorrelationId": "5fbfeeb6-27c6-414a-accc-e28aa9ddd190",
+  "backendRoles": [
+    {
+      "principalId": "e73a0c9f-60b4-4c8b-983d-6c311c36af21",
+      "roleDefinitionId": "/subscriptions/121e2ce8-c399-4fea-958a-09d15ed949c4/providers/Microsoft.Authorization/roleDefinitions/ba92f5b4-2d11-453d-a403-e96b0029c9fe",
+      "scope": "/subscriptions/121e2ce8-c399-4fea-958a-09d15ed949c4/resourcegroups/rg-tf36922-e8195f-state/providers/Microsoft.Storage/storageAccounts/sttf36922e8195f/blobServices/default/containers/tfstate"
+    }
+  ],
+  "crossProviderAssignmentsInBackendSubscription": 0,
+  "backendRolesVerifiedAt": "2026-09-08T12:59:05.5231066Z"
+}
