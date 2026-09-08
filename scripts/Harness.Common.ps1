@@ -50,7 +50,10 @@ function Assert-Equal([string] $Actual, [string] $Expected, [string] $Label) {
 }
 
 function Get-ExpectedIdentities {
-    $result = @{ TOPOLOGY = Get-RequiredEnvironment 'HARNESS_EXPECTED_TOPOLOGY' }
+    $result = @{
+        TOPOLOGY = Get-RequiredEnvironment 'HARNESS_EXPECTED_TOPOLOGY'
+        AZAPI_OBJECT_ID = Get-RequiredEnvironment 'HARNESS_EXPECTED_AZAPI_OBJECT_ID'
+    }
     foreach ($role in 'AZAPI', 'STATE') {
         foreach ($field in 'CLIENT_ID', 'TENANT_ID', 'SUBSCRIPTION_ID') {
             $name = "${role}_${field}"
@@ -73,11 +76,7 @@ function Assert-PlanData([System.Collections.IDictionary] $Plan, [System.Collect
             throw "Backend and provider $field must be $relationship for $topology."
         }
     }
-    $expectedObjectId = if ($Expected.Contains('AZAPI_OBJECT_ID')) {
-        $Expected.AZAPI_OBJECT_ID
-    } else {
-        Get-RequiredEnvironment 'HARNESS_EXPECTED_AZAPI_OBJECT_ID'
-    }
+    $expectedObjectId = $Expected.AZAPI_OBJECT_ID
     Assert-Identifier $expectedObjectId 'AZAPI_OBJECT_ID'
     $provider = 'registry.terraform.io/azure/azapi'
     $address = 'data.azapi_client_config.current'

@@ -1,0 +1,34 @@
+{
+  "mode": "gh-default",
+  "topology": "same-tenant",
+  "coreCommit": "0c5e9bef8b6d76866b0f0ddedab5b72af51bcc27",
+  "docsCommit": "1281ae9db0b308bf26c12d157b105f189e6681db",
+  "result": "passed",
+  "operations": [
+    "init",
+    "plan",
+    "show-json-in-memory"
+  ],
+  "applied": false,
+  "provider": {
+    "clientId": "b1c4b1f6-46bc-43ff-8109-55f4d2b6cc33",
+    "clientIdSource": "expected-client-to-object-id-mapping",
+    "objectId": "4018377b-0c35-4934-8498-23d83f0fa11a",
+    "tenantId": "13b2a159-de04-4835-a3ad-fd814c6adb4f",
+    "subscriptionId": "121e2ce8-c399-4fea-958a-09d15ed949c4"
+  },
+  "backendExpected": {
+    "clientId": "4387b74e-0954-4630-a230-4c3a766c2b34",
+    "tenantId": "13b2a159-de04-4835-a3ad-fd814c6adb4f",
+    "subscriptionId": "121e2ce8-c399-4fea-958a-09d15ed949c4"
+  },
+  "plannedResource": {
+    "address": "azapi_resource.example",
+    "name": "rg-tf36922-e8195f-gh-default",
+    "type": "Microsoft.Resources/resourceGroups@2024-03-01",
+    "parentId": "/subscriptions/121e2ce8-c399-4fea-958a-09d15ed949c4",
+    "action": "create"
+  },
+  "run": "gh-default-34222433385-1",
+  "stateKey": "tf36922.gh-default.34222433385.1.tfstate"
+}

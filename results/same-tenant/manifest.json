@@ -1,0 +1,46 @@
+{
+  "date": "2026-09-08",
+  "topology": "same-tenant",
+  "harnessCommit": "da708b332389cd72f62dee532dd728198b4a313e",
+  "coreCommit": "0c5e9bef8b6d76866b0f0ddedab5b72af51bcc27",
+  "docsCommit": "1281ae9db0b308bf26c12d157b105f189e6681db",
+  "scope": ["init", "plan", "show-json-in-memory"],
+  "applied": false,
+  "runs": [
+    {
+      "mode": "gh-default",
+      "runId": 34222433385,
+      "jobId": 102048475626,
+      "artifactId": 10054462398,
+      "url": "https://github.com/microsoft-avm-end-to-end-tests/terraform-backend-env-e2e-36922/actions/runs/34222433385",
+      "result": "success"
+    },
+    {
+      "mode": "gh-strict",
+      "runId": 34222437502,
+      "jobId": 102048489876,
+      "artifactId": 10054445694,
+      "url": "https://github.com/microsoft-avm-end-to-end-tests/terraform-backend-env-e2e-36922/actions/runs/34222437502",
+      "result": "success"
+    },
+    {
+      "mode": "ado-default",
+      "definitionId": 374,
+      "runId": 138,
+      "jobId": "12f1170f-54f2-53f3-20dd-22fc7dff55f9",
+      "artifactName": "evidence-ado-default-138-1",
+      "url": "https://dev.azure.com/microsoft-avm-end-to-end-tests/terraform-backend-env-e2e-36922/_build/results?buildId=138",
+      "result": "succeeded"
+    },
+    {
+      "mode": "ado-strict",
+      "definitionId": 375,
+      "runId": 139,
+      "jobId": "12f1170f-54f2-53f3-20dd-22fc7dff55f9",
+      "artifactName": "evidence-ado-strict-139-1",
+      "url": "https://dev.azure.com/microsoft-avm-end-to-end-tests/terraform-backend-env-e2e-36922/_build/results?buildId=139",
+      "result": "succeeded"
+    }
+  ],
+  "crossTenantStatus": "Not run; CSUTF MFA and approved provider deployment pending."
+}
