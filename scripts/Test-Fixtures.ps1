@@ -33,6 +33,10 @@ foreach ($file in Get-ChildItem $PSScriptRoot -Filter '*.ps1') {
 }
 $inlineCount = 0
 foreach ($mode in $script:Modes.Keys) {
+    $hcl = Get-Content (Join-Path $script:RepositoryRoot "examples\$mode\main.tf") -Raw
+    if ($hcl -notmatch 'required_version = ">= 1\.17\.0"') {
+        throw 'Preserve the documented core-version constraint; prerelease constraints are invalid.'
+    }
     $github = $mode.StartsWith('gh-')
     $path = if ($github) { ".github\workflows\$mode.yml" } else { ".ado\$mode.yml" }
     $yaml = ConvertTo-Lf (Get-Content (Join-Path $script:RepositoryRoot $path) -Raw)
@@ -45,13 +49,8 @@ foreach ($mode in $script:Modes.Keys) {
             throw "$mode must be manually dispatched only."
         }
         if ($yaml -notmatch 'id-token: write' -or $yaml -notmatch 'contents: read') { throw 'Missing minimum GitHub permissions.' }
-        if ($mode -eq 'gh-strict') {
-            foreach ($line in '$env:ARM_BACKEND_OIDC_REQUEST_URL = $env:ACTIONS_ID_TOKEN_REQUEST_URL',
-                '$env:ARM_BACKEND_OIDC_REQUEST_TOKEN = $env:ACTIONS_ID_TOKEN_REQUEST_TOKEN') {
-                if ([regex]::Matches($yaml, [regex]::Escape($line)).Count -ne 2) {
-                    throw 'Strict GitHub init and plan must each map their own broker inputs.'
-                }
-            }
+        if ($yaml -match 'ARM_BACKEND_OIDC_REQUEST_(URL|TOKEN)') {
+            throw 'Both GitHub modes must use native job broker fallback without explicit copies.'
         }
     } else {
         if ($yaml -notmatch '(?m)^trigger: none\npr: none$') { throw 'ADO trigger and PR trigger must be disabled.' }
@@ -186,10 +185,6 @@ try {
             if ($github) {
                 $env:ACTIONS_ID_TOKEN_REQUEST_URL = 'https://example.invalid/github-broker'
                 $env:ACTIONS_ID_TOKEN_REQUEST_TOKEN = 'synthetic-test-value'
-                if ($strict) {
-                    $env:ARM_BACKEND_OIDC_REQUEST_URL = $env:ACTIONS_ID_TOKEN_REQUEST_URL
-                    $env:ARM_BACKEND_OIDC_REQUEST_TOKEN = $env:ACTIONS_ID_TOKEN_REQUEST_TOKEN
-                }
             } else {
                 $env:SYSTEM_OIDCREQUESTURI = 'https://example.invalid/ado-broker'
                 $env:SYSTEM_ACCESSTOKEN = 'synthetic-test-value'
@@ -205,6 +200,14 @@ try {
             }
             & "$PSScriptRoot\Assert-Run.ps1" -Mode $mode -Phase $phase 6>$null
             $authPassed++
+            if ($github) {
+                $env:ARM_BACKEND_OIDC_REQUEST_URL = $env:ACTIONS_ID_TOKEN_REQUEST_URL
+                $rejected = $false
+                try { & "$PSScriptRoot\Assert-Run.ps1" -Mode $mode -Phase $phase 6>$null } catch { $rejected = $true }
+                if (-not $rejected) { throw "$mode $phase accepted a backend broker override." }
+                $env:ARM_BACKEND_OIDC_REQUEST_URL = $null
+                $authPassed++
+            }
             [Environment]::SetEnvironmentVariable("${prefix}CLIENT_ID", $expected.AZAPI_CLIENT_ID)
             $rejected = $false
             try { & "$PSScriptRoot\Assert-Run.ps1" -Mode $mode -Phase $phase 6>$null } catch { $rejected = $true }
@@ -215,4 +218,5 @@ try {
 } finally {
     foreach ($name in $authNames) { [Environment]::SetEnvironmentVariable($name, $saved[$name]) }
 }
+& "$PSScriptRoot\Test-BuildTerraform.ps1"
 Write-Host "PASS: source extraction, $inlineCount inline PowerShell blocks, all scripts, $passed plan cases and $authPassed runtime auth cases. No Azure/CI operations performed."

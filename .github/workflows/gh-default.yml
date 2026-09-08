@@ -53,7 +53,7 @@ jobs:
       - uses: actions/cache@v4
         with:
           path: .build\go
-          key: go-${{ runner.os }}-1.26.4-e8195f605d24299788cdf36738915d84563e4c58
+          key: go-${{ runner.os }}-1.26.4-0c5e9bef8b6d76866b0f0ddedab5b72af51bcc27
 
       - name: Build pinned Terraform source (never a release binary)
         shell: pwsh

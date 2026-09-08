@@ -1,12 +1,12 @@
 {
   "docsRepository": "https://github.com/hashicorp/web-unified-docs",
   "docsPullRequest": "https://github.com/hashicorp/web-unified-docs/pull/3332",
-  "docsCommit": "d55950c86e2dc3757df3b7bd2279b0cf96fe1679",
+  "docsCommit": "1281ae9db0b308bf26c12d157b105f189e6681db",
   "docsPath": "content/terraform/v1.16.x/docs/language/backend/azurerm.mdx",
-  "docsBlob": "8ef5cfa992f7d148134cf304d3d39f7c236aa626",
-  "docsSha256Lf": "5c325549fc3772d096d3ce28c5578559a706c708ac72d4a7907b60beb19649c3",
+  "docsBlob": "ffdf25ea7321f83f08059f806f6e3fe14efc7612",
+  "docsSha256Lf": "989d51bd54730a6c70c587d5ba75fa320f974c62c35488975a57ca51c8e1ec0a",
   "coreRepository": "https://github.com/jaredfholgate/terraform.git",
-  "coreCommit": "e8195f605d24299788cdf36738915d84563e4c58",
+  "coreCommit": "0c5e9bef8b6d76866b0f0ddedab5b72af51bcc27",
   "corePullRequest": "https://github.com/hashicorp/terraform/pull/36922",
   "goVersion": "1.26.4",
   "snippets": [
@@ -20,7 +20,7 @@
       "mode": "gh-strict",
       "heading": "GitHub Actions with separate identities in strict mode",
       "hclSha256": "8f27b214a648d07b8c6a98ec030ff5abc545e2ad44ff0367c9326ace36ee3898",
-      "yamlSha256": "2433bab8a7c8ad15c7c1cb0aaab80409d7fabe581e7fd25a0a30804df8795ba2"
+      "yamlSha256": "98f353085d1dc07ab4d701a21c37bde324d262ed4d53ff5f2eadfc20d1448ba8"
     },
     {
       "mode": "ado-default",

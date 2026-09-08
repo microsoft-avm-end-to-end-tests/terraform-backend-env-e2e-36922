@@ -31,7 +31,7 @@ steps:
   - task: Cache@2
     displayName: Cache Go modules and compilation only
     inputs:
-      key: '"go" | "$(Agent.OS)" | "1.26.4" | "e8195f605d24299788cdf36738915d84563e4c58"'
+      key: '"go" | "$(Agent.OS)" | "1.26.4" | "0c5e9bef8b6d76866b0f0ddedab5b72af51bcc27"'
       path: '$(Build.SourcesDirectory)\.build\go'
 
   - pwsh: .\scripts\Build-Terraform.ps1 -CI AzurePipelines
