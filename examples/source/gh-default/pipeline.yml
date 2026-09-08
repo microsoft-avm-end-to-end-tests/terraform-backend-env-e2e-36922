@@ -1,0 +1,55 @@
+name: Plan with separate Azure identities
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    env:
+      # Provider identity and shared authentication flags.
+      ARM_TENANT_ID: ${{ vars.AZAPI_TENANT_ID }}
+      ARM_SUBSCRIPTION_ID: ${{ vars.AZAPI_SUBSCRIPTION_ID }}
+      ARM_CLIENT_ID: ${{ vars.AZAPI_CLIENT_ID }}
+      ARM_USE_OIDC: "true"
+      ARM_USE_AZUREAD: "true"
+
+      # Override only the backend identity; other settings use fallback.
+      ARM_BACKEND_CLIENT_ID: ${{ vars.STATE_CLIENT_ID }}
+      ARM_BACKEND_TENANT_ID: ${{ vars.STATE_TENANT_ID }}
+
+      # Non-secret storage location passed during initialization.
+      STATE_STORAGE_ACCOUNT_NAME: ${{ vars.STATE_STORAGE_ACCOUNT_NAME }}
+      STATE_CONTAINER_NAME: ${{ vars.STATE_CONTAINER_NAME }}
+      STATE_KEY: ${{ vars.STATE_KEY }}
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ vars.TERRAFORM_VERSION }}
+          terraform_wrapper: false
+
+      - name: Initialize backend
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $PSNativeCommandUseErrorActionPreference = $true
+
+          terraform init -input=false `
+            "-backend-config=storage_account_name=$env:STATE_STORAGE_ACCOUNT_NAME" `
+            "-backend-config=container_name=$env:STATE_CONTAINER_NAME" `
+            "-backend-config=key=$env:STATE_KEY"
+
+      - name: Plan
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $PSNativeCommandUseErrorActionPreference = $true
+
+          terraform plan -input=false -out=tfplan
